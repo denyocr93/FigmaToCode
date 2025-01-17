@@ -51,7 +51,7 @@ const CodePanel = (props: CodePanelProps) => {
     <div className="w-full flex flex-col gap-2 mt-2">
       <div className="flex items-center justify-between w-full">
         <p className="text-lg font-medium text-center dark:text-white rounded-lg">
-          Code
+          Codexxx
         </p>
         {isEmpty === false && (
           <button

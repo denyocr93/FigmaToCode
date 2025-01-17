@@ -52,10 +52,14 @@ export const flutterBoxDecorationColor = (
 
 export const flutterDecorationImage = (node: SceneNode, fill: ImagePaint) => {
   addWarning("Image fills are replaced with placeholders");
+
+  let nodeWidth = node.width.toFixed(
+    0,
+  );
+  let nodeHeight = node.height.toFixed(0);
+
   return generateWidgetCode("DecorationImage", {
-    image: `NetworkImage("https://via.placeholder.com/${node.width.toFixed(
-      0,
-    )}x${node.height.toFixed(0)}")`,
+    image: `NetworkImage("https://placehold.co/${nodeWidth}x${nodeHeight}.png")`,
     fit: fitToBoxFit(fill),
   });
 };

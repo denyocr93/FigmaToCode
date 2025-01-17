@@ -6,7 +6,6 @@ import { retrieveTopFill } from "../common/retrieveFill";
 import { FlutterDefaultBuilder } from "./flutterDefaultBuilder";
 import { FlutterTextBuilder } from "./flutterTextBuilder";
 import { indentString } from "../common/indentString";
-
 import {
   getCrossAxisAlignment,
   getMainAxisAlignment,
@@ -66,7 +65,47 @@ export const flutterMain = (
   localSettings = settings;
   previousExecutionCache = [];
 
-  let result = flutterWidgetGenerator(sceneNode);
+  let result = flutterWidgetGenerator(sceneNode).trim();
+  //read all lines
+  let lines = result.split("\n");
+  for (let i = 0; i < lines.length; i++) {
+    //Remove invalid lines
+    if (lines[i].trim() == ",") {
+      lines[i] = "";
+    }
+
+    if (lines[i].indexOf("textDecoration:") > -1) {
+      lines[i] = lines[i].replace("textDecoration:", "decoration:");
+    }
+    if (lines[i].indexOf("Border.only(") > -1) {
+      lines[i] = lines[i].replace("Border.only(", "Border(");
+    }
+  }
+
+  // My Custom Adjustment
+  if (lines[0].indexOf("Container") > -1) {
+    if (lines[1].indexOf("width:") > -1) {
+      lines[1] = "width: MediaQuery.of(context).size.width,";
+    }
+    if (lines[2].indexOf("height:") > -1) {
+      // sometime we will need this height if the widget is Stack,
+      // so we will not remove it for now
+      // let heightValue = lines[2].split("height:")[1].split(",")[0].trim();
+      // lines[2] = lines[2].replaceAll(heightValue, "null");
+    }
+  }
+
+  result = lines.join("\n");
+  result = result.trim();
+
+  //if not ends with , add , at the end
+  if (!result.endsWith(",")) {
+    result = result + ",";
+  }
+
+  //set clippboard
+  // figma.ui.postMessage({ type: "copyToClipboard", data: result });
+
   switch (localSettings.flutterGenerationMode) {
     case "snippet":
       return result;
@@ -148,9 +187,11 @@ const flutterContainer = (node: SceneNode, child: string): string => {
   let image = "";
   if ("fills" in node && retrieveTopFill(node.fills)?.type === "IMAGE") {
     addWarning("Image fills are replaced with placeholders");
-    image = `Image.network("https://via.placeholder.com/${node.width.toFixed(
-      0,
-    )}x${node.height.toFixed(0)}")`;
+    // image = `Image.network("https://via.placeholder.com/${node.width.toFixed(
+
+    let nodeWidth = node.width.toFixed(0);
+    let nodeHeight = node.height.toFixed(0);
+    image = `Image.network("https://placehold.co/${nodeWidth}x${nodeHeight}.png")`;
   }
 
   if (child.length > 0) {
